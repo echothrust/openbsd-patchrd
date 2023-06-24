@@ -103,6 +103,6 @@ fi
 
 mv "${_WRKDIR}/OpenBSD-${RELEASE}-${_TS}.iso" .
 mv "${_WRKDIR}/bsd.rd" "bsd-${RELEASE}-${_TS}.rd"
-mv "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz
+mv "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz
 
-md5 "OpenBSD-${RELEASE}-${_TS}.iso" "bsd-${RELEASE}-${_TS}.rd" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz |tee ${RELEASE}-${TS}.md5
+md5 "OpenBSD-${RELEASE}-${_TS}.iso" "bsd-${RELEASE}-${_TS}.rd" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz |tee ${RELEASE}-${_TS}.md5
