@@ -82,8 +82,10 @@ fi
 cp "${_WRKDIR}/bsd.rd" "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/"
 if [ -d fs ]; then
 	install -d ${_WRKDIR}/fs/etc
+	rsync -a fs/etc/ ${_WRKDIR}/fs/etc
+	chown -R root.wheel ${_WRKDIR}/fs/etc
+	chmod 0555 ${_WRKDIR}/fs/etc/rc.firsttime
 	install -o root -g wheel -m 0555 fs/install.site ${_WRKDIR}/fs
-	install -o root -g wheel -m 0555 fs/rc.firsttime ${_WRKDIR}/fs/etc
 	(cd ${_WRKDIR}/fs && tar czphf ${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz .)
 	(cd "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/" && ls -T )|grep -v bsd.rd >${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/index.txt
 fi
