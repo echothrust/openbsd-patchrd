@@ -22,7 +22,7 @@ fi
 
 RELEASE=${1-"7.0"}
 ARCH=${2-"amd64"}
-
+FS=$(basename ${3-"fs"})
 set -e
 umask 022
 
@@ -80,17 +80,17 @@ if ${_rdgz}; then
 fi
 
 cp "${_WRKDIR}/bsd.rd" "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/"
-if [ -d fs ]; then
-	install -d ${_WRKDIR}/fs/etc
-	rsync -a fs/etc/ ${_WRKDIR}/fs/etc
-	chown -R root.wheel ${_WRKDIR}/fs/etc
-	chmod 0555 ${_WRKDIR}/fs/etc/rc.firsttime
-	install -o root -g wheel -m 0555 fs/install.site ${_WRKDIR}/fs
-	(cd ${_WRKDIR}/fs && tar czphf ${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz .)
+if [ -d "${FS}" ]; then
+	install -d ${_WRKDIR}/${FS}/etc
+	rsync -a ${FS}/etc/ ${_WRKDIR}/${FS}/etc
+	chown -R root.wheel ${_WRKDIR}/${FS}/etc
+	chmod 0555 ${_WRKDIR}/${FS}/etc/rc.firsttime
+	install -o root -g wheel -m 0555 ${FS}/install.site ${_WRKDIR}/${FS}
+	(cd ${_WRKDIR}/${FS} && tar czphf ${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz .)
 	(cd "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/" && ls -T )|grep -v bsd.rd >${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/index.txt
 fi
 
-(cd ${_WRKDIR} && mkhybrid -a -R -T -L -l -d -D -N -o "OpenBSD-${RELEASE}-${_TS}.iso" -v -v \
+(cd ${_WRKDIR} && mkhybrid -a -R -T -L -l -d -D -N -o "OpenBSD-${RELEASE}-${FS}-${_TS}.iso" -v -v \
 	-A "OpenBSD/${ARCH}	${RELEASE} echothrust Install CD" \
 	-P "Copyright (c) $(date +%Y) Echothrust Solutions" \
 	-p "Pantelis Roditis <proditis]at[echothrust.com>" \
@@ -103,8 +103,8 @@ fi
 #    -p "Pantelis Roditis <proditis]@[echothrust.com>" -b $RELEASE/${ARCH}/cdboot \
 #    -o "OpenBSD-${RELEASE}-${_TS}.iso" "${_WRKDIR}/OpenBSD")
 
-mv "${_WRKDIR}/OpenBSD-${RELEASE}-${_TS}.iso" .
-mv "${_WRKDIR}/bsd.rd" "bsd-${RELEASE}-${_TS}.rd"
+mv "${_WRKDIR}/OpenBSD-${RELEASE}-${FS}-${_TS}.iso" .
+mv "${_WRKDIR}/bsd.rd" "bsd-${RELEASE}-${FS}-${_TS}.rd"
 mv "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz
 
-md5 "OpenBSD-${RELEASE}-${_TS}.iso" "bsd-${RELEASE}-${_TS}.rd" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz |tee ${RELEASE}-${_TS}.md5
+md5 "OpenBSD-${RELEASE}-${FS}-${_TS}.iso" "bsd-${RELEASE}-${FS}-${_TS}.rd" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz |tee ${RELEASE}-${_TS}.md5
