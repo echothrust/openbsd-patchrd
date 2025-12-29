@@ -69,7 +69,8 @@ rdsetroot -x ${_bsdrd} ${_rdextract}
 _vndev=$(vnconfig ${_rdextract})
 install -d ${_rdmnt}
 mount /dev/${_vndev}a ${_rdmnt}
-cp ${_WRKDIR}/auto_install.conf ${_rdmnt}
+cp ${_WRKDIR}/*install* ${_rdmnt}
+chmod +x ${_rdmnt}/install.sub
 umount ${_rdmnt}
 vnconfig -u ${_vndev}
 rdsetroot ${_bsdrd} ${_rdextract}
