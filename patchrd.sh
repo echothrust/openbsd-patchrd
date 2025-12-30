@@ -64,22 +64,25 @@ if [[ $(file -bi ${_bsdrd}) == "application/x-gzip" ]]; then
   _rdgz=true
 fi
 
-
-rdsetroot -x ${_bsdrd} ${_rdextract}
+echo "Patching bsd.rd"
+rdsetroot -dx ${_bsdrd} ${_rdextract}
 _vndev=$(vnconfig ${_rdextract})
 install -d ${_rdmnt}
 mount /dev/${_vndev}a ${_rdmnt}
-cp ${_WRKDIR}/*install* ${_rdmnt}
-chmod +x ${_rdmnt}/install.sub
+cp ${_WRKDIR}/auto_install.conf ${_rdmnt}
+if [ -s ${FS}/install.sub ]; then
+  install -o root -g wheel -m 0555 ${FS}/install.sub ${_rdmnt}
+fi
 umount ${_rdmnt}
 vnconfig -u ${_vndev}
-rdsetroot ${_bsdrd} ${_rdextract}
+rdsetroot -d ${_bsdrd} ${_rdextract}
 
 if ${_rdgz}; then
   gzip ${_bsdrd}
   mv ${_bsdrd}.gz ${_bsdrd}
 fi
 
+echo "Preparing site${RELEASE}.tgz"
 cp "${_WRKDIR}/bsd.rd" "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/"
 if [ -d "${FS}" ]; then
 	install -d ${_WRKDIR}/${FS}/etc
@@ -91,7 +94,8 @@ if [ -d "${FS}" ]; then
 	(cd "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/" && ls -T )|grep -v bsd.rd >${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/index.txt
 fi
 
-(cd ${_WRKDIR} && mkhybrid -a -R -T -L -l -d -D -N -o "OpenBSD-${RELEASE}-${FS}-${_TS}.iso" -v -v \
+echo "Patching ISO"
+(cd ${_WRKDIR} && mkhybrid -a -R -T -L -l -d -D -N -o "OpenBSD-${RELEASE}-${FS}.iso" -v -v \
 	-A "OpenBSD/${ARCH}	${RELEASE} echothrust Install CD" \
 	-P "Copyright (c) $(date +%Y) Echothrust Solutions" \
 	-p "Pantelis Roditis <proditis]at[echothrust.com>" \
@@ -99,13 +103,7 @@ fi
 	-b ${RELEASE}/${ARCH}/cdbr -c ${RELEASE}/${ARCH}/boot.catalog \
 	"${_WRKDIR}/OpenBSD")
 
-#(cd ${_WRKDIR} && mkisofs -J -R -no-emul-boot \
-#    -V "OpenBSD/${ARCH} ${RELEASE} echothrust Install CD" \
-#    -p "Pantelis Roditis <proditis]@[echothrust.com>" -b $RELEASE/${ARCH}/cdboot \
-#    -o "OpenBSD-${RELEASE}-${_TS}.iso" "${_WRKDIR}/OpenBSD")
-
-mv "${_WRKDIR}/OpenBSD-${RELEASE}-${FS}-${_TS}.iso" .
-mv "${_WRKDIR}/bsd.rd" "bsd-${RELEASE}-${FS}-${_TS}.rd"
-mv "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz
-
-md5 "OpenBSD-${RELEASE}-${FS}-${_TS}.iso" "bsd-${RELEASE}-${FS}-${_TS}.rd" site$(echo ${RELEASE}|sed 's/\.//')-${_TS}.tgz |tee ${RELEASE}-${_TS}.md5
+mv "${_WRKDIR}/OpenBSD-${RELEASE}-${FS}.iso" .
+mv "${_WRKDIR}/bsd.rd" "bsd-${RELEASE}-${FS}.rd"
+mv "${_WRKDIR}/OpenBSD/${RELEASE}/${ARCH}/site$(echo ${RELEASE}|sed 's/\.//').tgz" site$(echo ${RELEASE}|sed 's/\.//').tgz
+md5 "OpenBSD-${RELEASE}-${FS}.iso" "bsd-${RELEASE}-${FS}.rd" site$(echo ${RELEASE}|sed 's/\.//').tgz |tee ${RELEASE}.md5
